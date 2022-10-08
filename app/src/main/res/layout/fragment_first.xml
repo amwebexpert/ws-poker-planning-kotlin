@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/txtPokerSessionTitle"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".FirstFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"><![CDATA[
+
+        />
+
+        ]]>
+
+        <Button
+            android:id="@+id/btnJoinRoom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Join Room"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ddlVoteCategories" />
+
+        <TextView
+            android:id="@+id/textSessionTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Poker Planning Session"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Spinner
+            android:id="@+id/ddlVoteCategories"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="@+id/editTextMyName"
+            app:layout_constraintStart_toStartOf="@+id/editTextMyName"
+            app:layout_constraintTop_toBottomOf="@+id/editTextMyName" />
+
+        <EditText
+            android:id="@+id/editTextHostName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ems="10"
+            android:hint="Type the poker plannind hostname here"
+            android:inputType="textPersonName"
+            android:text="ws-poker-planning.herokuapp.com"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textSessionTitle" />
+
+        <EditText
+            android:id="@+id/editTextRoomName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ems="10"
+            android:hint="Type the team name here"
+            android:inputType="textPersonName"
+            android:text="GOROCKIT"
+            app:layout_constraintEnd_toEndOf="@+id/editTextHostName"
+            app:layout_constraintStart_toStartOf="@+id/editTextHostName"
+            app:layout_constraintTop_toBottomOf="@+id/editTextHostName" />
+
+        <EditText
+            android:id="@+id/editTextMyName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ems="10"
+            android:hint="Type your name here"
+            android:inputType="textPersonName"
+            android:text="amwebexpert"
+            app:layout_constraintEnd_toEndOf="@+id/editTextRoomName"
+            app:layout_constraintStart_toStartOf="@+id/editTextRoomName"
+            app:layout_constraintTop_toBottomOf="@+id/editTextRoomName" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>
