@@ -1,15 +1,15 @@
 package com.amwebexpert.app.pokerplanning
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
-import android.view.Menu
-import android.view.MenuItem
-import androidx.navigation.NavController
-import androidx.navigation.fragment.NavHostFragment
 import com.amwebexpert.app.pokerplanning.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
