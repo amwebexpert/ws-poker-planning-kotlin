@@ -1,7 +1,6 @@
 package com.amwebexpert.app.pokerplanning
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,21 +11,28 @@ import com.amwebexpert.app.pokerplanning.databinding.FragmentFirstBinding
 import com.amwebexpert.app.pokerplanning.service.PokerPlanningService
 import com.amwebexpert.app.pokerplanning.service.VoteChoices
 import com.amwebexpert.app.pokerplanning.ws.WebSocketService
-import okhttp3.*
-import okio.ByteString
+import com.amwebexpert.app.pokerplanning.ws.WsTextMessageListener
 
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
 class FirstFragment : Fragment() {
+    companion object {
+        private val TAG = FirstFragment::class.java.simpleName
+    }
 
     private var _binding: FragmentFirstBinding? = null
 
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
+    private val webSocketService get() = WebSocketService.instance
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentFirstBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -34,21 +40,27 @@ class FirstFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.textSessionTitle.text = "${binding.editTextRoomName.text} Session"
+        // setup drop down list
+        val choices = PokerPlanningService.votesCategories.values.toList()
+        val adapter = ArrayAdapter<VoteChoices>(
+            this.requireContext(),
+            android.R.layout.simple_spinner_item,
+            choices
+        )
+        binding.ddlVoteCategories.adapter = adapter
+
+        // setup room action buttons
+        binding.btnJoinRoom.isEnabled = false
+        binding.btnJoinRoom.setOnClickListener {
+            webSocketService.sendVote("MySuperKotlinPowers", "4")
+        }
+
+        // bind room name to title
         binding.editTextRoomName.doOnTextChanged { inputText, _, _, _ ->
             binding.textSessionTitle.text = "$inputText Session"
         }
 
-        val choices = PokerPlanningService.votesCategories.values.toList()
-        val adapter = ArrayAdapter<VoteChoices>(this.requireContext(), android.R.layout.simple_spinner_item, choices)
-        binding.ddlVoteCategories.adapter = adapter
-
         connectToWebSocket()
-
-        binding.btnJoinRoom.setOnClickListener {
-            val service = WebSocketService.instance
-            service.sendVote("MySuperKotlinPowers", "4")
-        }
     }
 
     private fun connectToWebSocket() {
@@ -56,51 +68,42 @@ class FirstFragment : Fragment() {
             return
         }
 
-        val service = WebSocketService.instance
-        val hostname = binding.editTextHostName.text.toString()
-
-        service.connect(hostname = hostname, wsListener = object: WebSocketListener() {
-            override fun onOpen(webSocket: WebSocket, response: Response) {
-                output("Socket opened.")
-            }
-
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                output("Receiving : $text")
-                requireActivity().runOnUiThread {
-                    binding.textSocketResponse.setText(text)
+        webSocketService.connect(isSecure = true,
+            hostname = binding.editTextHostName.text.toString(),
+            roomUUID = "e78caaee-a1a2-4298-860d-81d7752226ae",
+            listener = object : WsTextMessageListener {
+                override fun onConnectSuccess() {
+                    requireActivity().runOnUiThread {
+                        _binding?.btnJoinRoom?.isEnabled = true
+                    }
                 }
-            }
 
-            override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-                output("Receiving bytes : " + bytes!!.hex())
-            }
+                override fun onConnectFailed() {
+                    requireActivity().runOnUiThread {
+                        _binding?.btnJoinRoom?.isEnabled = false
+                    }
+                    connectToWebSocket()
+                }
 
-            override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-                output("Closing : $code / $reason")
-            }
+                override fun onClose() {
+                    requireActivity().runOnUiThread {
+                        _binding?.btnJoinRoom?.isEnabled = false
+                    }
+                    connectToWebSocket()
+                }
 
-            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                output("Closed : $code / $reason")
-                connectToWebSocket()
-            }
-
-            override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                t.printStackTrace()
-                output("Error : ${t.message} $response")
-                connectToWebSocket() // ensure it's necessary?
-            }
-
-            private fun output(txt: String) {
-                Log.v("WSS", txt)
-            }
-        })
-
+                override fun onMessage(text: String) {
+                    requireActivity().runOnUiThread {
+                        _binding?.textSocketResponse?.setText(text)
+                    }
+                }
+            })
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        WebSocketService.instance.disconnect()
+        webSocketService.disconnect()
     }
 
 }

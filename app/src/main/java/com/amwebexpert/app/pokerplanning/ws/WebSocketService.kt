@@ -1,41 +1,115 @@
 package com.amwebexpert.app.pokerplanning.ws
 
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.WebSocket
-import okhttp3.WebSocketListener
-import java.time.ZonedDateTime
+import android.util.Log
+import okhttp3.*
+import okio.ByteString
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 class WebSocketService {
     companion object {
         val instance = WebSocketService()
-        private val NORMAL_CLOSURE_STATUS = 1000
+
+        private const val NORMAL_CLOSURE_STATUS = 1001
+        private val TAG = WebSocketService::class.java.simpleName
     }
 
-    private var webSocket: WebSocket? = null
-    private var httpClient: OkHttpClient = OkHttpClient.Builder()
-        .readTimeout(3, TimeUnit.SECONDS)
+    private var isConnected = false
+    private lateinit var messageListener: WsTextMessageListener
+    private lateinit var webSocket: WebSocket
+    private val httpClient: OkHttpClient = OkHttpClient.Builder()
+        .readTimeout(5, TimeUnit.SECONDS)
+        .writeTimeout(5, TimeUnit.SECONDS)
+        .connectTimeout(10, TimeUnit.SECONDS)
         .build()
 
-    fun connect(hostname: String, wsListener: WebSocketListener) {
-        webSocket?.cancel()
+    fun connect(isSecure: Boolean, hostname: String, roomUUID: String, listener: WsTextMessageListener) {
+        if (isConnected) {
+            return
+        }
 
-        val request = buildRequest(hostname)
-        webSocket = httpClient.newWebSocket(request, wsListener)
+        messageListener = listener
+        val url = buildUrl(isSecure, hostname, roomUUID)
+        val request: Request = Request.Builder().url(url).build()
+        httpClient.newWebSocket(request, createWebSocketListener())
     }
 
-    private fun buildUrl(hostname: String): String = "wss://${hostname}/ws?roomUUID=e78caaee-a1a2-4298-860d-81d7752226ae"
+    private fun createWebSocketListener(): WebSocketListener {
+        return object: WebSocketListener() {
+            override fun onOpen(newWebSocket: WebSocket, response: Response) {
+                super.onOpen(webSocket = newWebSocket, response)
 
-    private fun buildRequest(hostname: String): Request = Request.Builder().url(buildUrl(hostname)).build()
+                webSocket = newWebSocket
+                isConnected = true
+                Log.i(TAG, "connect success")
+                messageListener.onConnectSuccess()
+            }
+
+            override fun onMessage(webSocket: WebSocket, text: String) {
+                super.onMessage(webSocket, text)
+                messageListener.onMessage(text)
+            }
+
+            override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+                super.onMessage(webSocket, bytes)
+                messageListener.onMessage(bytes.base64())
+            }
+
+            override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+                super.onClosing(webSocket, code, reason)
+                Log.i(TAG, "closing socket: $code / $reason")
+            }
+
+            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                super.onClosed(webSocket, code, reason)
+                isConnected = false
+                messageListener.onClose()
+            }
+
+            override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                super.onFailure(webSocket, t, response)
+                Log.e(TAG, "connect failed" + t.message, t)
+                isConnected = false
+                messageListener.onConnectFailed()
+            }
+        }
+    }
+
+    private fun buildUrl(isSecure: Boolean, hostname: String, roomUUID: String): String {
+        val protocol = if (isSecure) "wss" else "ws"
+        return "$protocol://${hostname}/ws?roomUUID=$roomUUID"
+    }
+
 
     fun disconnect() {
-        webSocket?.close(NORMAL_CLOSURE_STATUS, "disconnection")
+        if (isConnected) {
+            webSocket.cancel()
+            webSocket.close(NORMAL_CLOSURE_STATUS, "disconnection")
+            isConnected = false
+        }
     }
 
+    fun sendMessage(text: String): Boolean {
+        if (isConnected) {
+            webSocket.send(text)
+            return true
+        }
+
+        return false
+    }
+
+    fun sendMessage(byteString: ByteString): Boolean {
+        if (isConnected) {
+            webSocket.send(byteString)
+            return true
+        }
+
+        return false
+    }
+
+    // Create a messages factory
     fun sendVote(username: String, value: String) {
-        if (webSocket === null) {
+        if (!isConnected) {
             return
         }
 
@@ -50,7 +124,7 @@ class WebSocketService {
                             }
                         }
                     """.trimIndent()
-        webSocket?.send(message)
+        sendMessage(message)
     }
 
 }
