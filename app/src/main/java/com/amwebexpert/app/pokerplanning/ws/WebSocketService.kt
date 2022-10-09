@@ -120,7 +120,7 @@ class WebSocketService {
         }
     }
 
-    // Create a messages factory
+    // TODO Move this into poker planning messages factory
     fun sendVote(username: String, value: String) {
         if (!isConnected) {
             return
