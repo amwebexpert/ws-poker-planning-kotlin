@@ -14,6 +14,7 @@ class WebSocketService {
         private val TAG = WebSocketService::class.java.simpleName
     }
 
+    private val postponedMessages: Queue<String> = LinkedList()
     private var isConnected = false
     private lateinit var messageListener: WsTextMessageListener
     private lateinit var webSocket: WebSocket
@@ -43,6 +44,8 @@ class WebSocketService {
                 isConnected = true
                 Log.i(TAG, "connect success")
                 messageListener.onConnectSuccess()
+
+                flushPostponedMessages()
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
@@ -89,22 +92,32 @@ class WebSocketService {
         }
     }
 
-    fun sendMessage(text: String): Boolean {
-        if (isConnected) {
-            webSocket.send(text)
-            return true
+    fun flushPostponedMessages() {
+        synchronized(postponedMessages) {
+            while(postponedMessages.isNotEmpty()) {
+                sendMessage(postponedMessages.poll()!!)
+            }
         }
+    }
 
-        return false
+    fun sendMessage(text: String): Boolean {
+        return if (isConnected) {
+            webSocket.send(text)
+            true
+        } else {
+            postponedMessages.add(text)
+            false
+        }
     }
 
     fun sendMessage(byteString: ByteString): Boolean {
-        if (isConnected) {
+        return if (isConnected) {
             webSocket.send(byteString)
-            return true
+            true
+        } else {
+            postponedMessages.add(byteString.base64())
+            false
         }
-
-        return false
     }
 
     // Create a messages factory
