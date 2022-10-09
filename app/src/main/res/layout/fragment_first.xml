@@ -10,11 +10,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="16dp"><![CDATA[
-
-        />
-
-        ]]>
+        android:padding="16dp">
 
         <Button
             android:id="@+id/btnJoinRoom"
@@ -52,7 +48,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:ems="10"
-            android:hint="Type the poker plannind hostname here"
+            android:hint="Type the poker planning hostname here"
+            android:autofillHints="Type the poker planning hostname here"
             android:inputType="textPersonName"
             android:text="ws-poker-planning.herokuapp.com"
             app:layout_constraintEnd_toEndOf="parent"
@@ -84,5 +81,22 @@
             app:layout_constraintEnd_toEndOf="@+id/editTextRoomName"
             app:layout_constraintStart_toStartOf="@+id/editTextRoomName"
             app:layout_constraintTop_toBottomOf="@+id/editTextRoomName" />
+
+        <EditText
+            android:id="@+id/textSocketResponse"
+            android:layout_width="0dp"
+            android:layout_height="300dp"
+            android:layout_marginTop="16dp"
+            android:contentDescription="Socket response"
+            android:fontFamily="monospace"
+            android:inputType="textMultiLine"
+            android:maxLines="20"
+            android:singleLine="false"
+            android:textAlignment="viewStart"
+            android:typeface="monospace"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btnJoinRoom" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>
