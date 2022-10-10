@@ -73,27 +73,27 @@ class FirstFragment : Fragment() {
             roomUUID = "e78caaee-a1a2-4298-860d-81d7752226ae",
             listener = object : WsTextMessageListener {
                 override fun onConnectSuccess() {
-                    requireActivity().runOnUiThread {
+                    activity?.runOnUiThread {
                         _binding?.btnJoinRoom?.isEnabled = true
                     }
                 }
 
                 override fun onConnectFailed() {
-                    requireActivity().runOnUiThread {
+                    activity?.runOnUiThread {
                         _binding?.btnJoinRoom?.isEnabled = false
                     }
                     connectToWebSocket()
                 }
 
                 override fun onClose() {
-                    requireActivity().runOnUiThread {
+                    activity?.runOnUiThread {
                         _binding?.btnJoinRoom?.isEnabled = false
                     }
                     connectToWebSocket()
                 }
 
                 override fun onMessage(text: String) {
-                    requireActivity().runOnUiThread {
+                    activity?.runOnUiThread {
                         _binding?.textSocketResponse?.setText(text)
                     }
                 }
