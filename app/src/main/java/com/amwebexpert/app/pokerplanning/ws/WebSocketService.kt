@@ -119,25 +119,4 @@ class WebSocketService {
             false
         }
     }
-
-    // TODO Move this into poker planning messages factory
-    fun sendVote(username: String, value: String) {
-        if (!isConnected) {
-            return
-        }
-
-        val estimatedAtISO8601 = String.format("%tFT%<tT.%<tLZ", Calendar.getInstance(TimeZone.getTimeZone("Z")))
-        val message = """
-                        {
-                            "type": "vote",
-                            "payload": {
-                                "username": "$username",
-                                "estimate": "$value",
-                                "estimatedAtISO8601": "$estimatedAtISO8601"
-                            }
-                        }
-                    """.trimIndent()
-        sendMessage(message)
-    }
-
 }

@@ -10,8 +10,12 @@ import androidx.fragment.app.Fragment
 import com.amwebexpert.app.pokerplanning.databinding.FragmentFirstBinding
 import com.amwebexpert.app.pokerplanning.service.PokerPlanningService
 import com.amwebexpert.app.pokerplanning.service.VoteChoices
+import com.amwebexpert.app.pokerplanning.service.model.PokerPlanningSession
 import com.amwebexpert.app.pokerplanning.ws.WebSocketService
 import com.amwebexpert.app.pokerplanning.ws.WsTextMessageListener
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 
 /**
@@ -27,6 +31,7 @@ class FirstFragment : Fragment() {
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
     private val webSocketService get() = WebSocketService.instance
+    private val pokerPlanningService get() = PokerPlanningService.instance
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,7 +46,7 @@ class FirstFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // setup drop down list
-        val choices = PokerPlanningService.votesCategories.values.toList()
+        val choices = pokerPlanningService.votesCategories.values.toList()
         val adapter = ArrayAdapter<VoteChoices>(
             this.requireContext(),
             android.R.layout.simple_spinner_item,
@@ -52,7 +57,11 @@ class FirstFragment : Fragment() {
         // setup room action buttons
         binding.btnJoinRoom.isEnabled = false
         binding.btnJoinRoom.setOnClickListener {
-            webSocketService.sendVote("MySuperKotlinPowers", "4")
+            val username: String = binding.editTextMyName.text.toString()
+            val estimate = "5"
+            val message = pokerPlanningService.buildEstimateMessage(username = username, estimate = estimate)
+            val jsonMessage = Json.encodeToString(message)
+            webSocketService.sendMessage(text = jsonMessage)
         }
 
         // bind room name to title
@@ -94,7 +103,8 @@ class FirstFragment : Fragment() {
 
                 override fun onMessage(text: String) {
                     activity?.runOnUiThread {
-                        _binding?.textSocketResponse?.setText(text)
+                        val session = Json.decodeFromString<PokerPlanningSession>(text)
+                        _binding?.textSocketResponse?.setText(session.toString())
                     }
                 }
             })
