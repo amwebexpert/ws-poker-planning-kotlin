@@ -44,7 +44,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment-ktx:2.5.2'
     implementation 'androidx.navigation:navigation-ui-ktx:2.5.2'
 
-    implementation 'com.squareup.okhttp3:okhttp:4.9.2'
+    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.10'
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0'
 
     testImplementation 'junit:junit:4.13.2'

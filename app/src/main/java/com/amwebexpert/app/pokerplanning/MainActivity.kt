@@ -3,6 +3,7 @@ package com.amwebexpert.app.pokerplanning
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
@@ -53,9 +54,16 @@ class MainActivity : AppCompatActivity() {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
-            R.id.action_settings -> true
+            R.id.action_settings -> {
+                showSettings()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun showSettings() {
+        Toast.makeText(baseContext, "Not yet implemented" , Toast.LENGTH_SHORT ).show()
     }
 
     override fun onSupportNavigateUp(): Boolean {
